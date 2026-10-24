@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Endless ATC - London Heathrow Radar (EGLL)</title>
+  <title>Endless ATC - Realistic Heathrow Radar (EGLL)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
@@ -18,28 +18,28 @@
     canvas { image-rendering: pixelated; }
   </style>
 </head>
-<body class="bg-[#050b08] text-[#a7f3d0] min-h-screen font-mono flex flex-col justify-between select-none overflow-x-hidden">
+<body class="bg-[#030805] text-[#a7f3d0] min-h-screen font-mono flex flex-col justify-between select-none overflow-x-hidden">
 
-  <!-- Endless ATC Top Strip -->
-  <header class="border-b border-[#064e3b]/80 bg-[#02130b] px-4 py-2 flex items-center justify-between text-xs">
+  <!-- Top Real-time Scope Header -->
+  <header class="border-b border-[#064e3b]/80 bg-[#011409] px-4 py-2 flex items-center justify-between text-xs">
     <div class="flex items-center space-x-3">
-      <div class="w-7 h-7 rounded bg-[#064e3b]/40 border border-[#10b981]/40 flex items-center justify-center text-[#34d399]">
+      <div class="w-8 h-8 rounded bg-[#064e3b]/40 border border-[#10b981]/40 flex items-center justify-center text-[#34d399]">
         <i class="fa-solid fa-plane-arrival text-sm"></i>
       </div>
       <div>
         <span class="text-sm font-bold tracking-widest text-[#34d399]">ENDLESS <span class="text-white">ATC</span></span>
-        <span class="text-[10px] text-[#059669] block">EGLL_APP • HEATHROW DIRECTOR • SEPARATION 3.0 NM / 1,000 FT</span>
+        <span class="text-[10px] text-[#059669] block">HEATHROW RADAR (EGLL) • SCALE: 1 NM = 10 PX • 3°/SEC STD TURN</span>
       </div>
     </div>
 
-    <!-- Stats & Sim Rate Controls -->
-    <div class="flex items-center space-x-5">
+    <!-- Stats & Time Acceleration Controls -->
+    <div class="flex items-center space-x-6">
       <div>
         <span class="text-[#047857] text-[10px] block">SIM RATE</span>
         <div class="flex space-x-1">
-          <button onclick="setSimRate(1)" id="rate-1" class="px-1.5 py-0.5 rounded text-[10px] bg-[#10b981] text-black font-bold">1x</button>
-          <button onclick="setSimRate(2)" id="rate-2" class="px-1.5 py-0.5 rounded text-[10px] bg-[#064e3b] text-[#6ee7b7]">2x</button>
-          <button onclick="setSimRate(4)" id="rate-4" class="px-1.5 py-0.5 rounded text-[10px] bg-[#064e3b] text-[#6ee7b7]">4x</button>
+          <button onclick="setSimRate(1)" id="rate-1" class="px-2 py-0.5 rounded text-[10px] bg-[#10b981] text-black font-bold">1x (Real)</button>
+          <button onclick="setSimRate(2)" id="rate-2" class="px-2 py-0.5 rounded text-[10px] bg-[#064e3b] text-[#6ee7b7]">2x</button>
+          <button onclick="setSimRate(4)" id="rate-4" class="px-2 py-0.5 rounded text-[10px] bg-[#064e3b] text-[#6ee7b7]">4x</button>
         </div>
       </div>
       <div>
@@ -51,21 +51,21 @@
         <span id="stat-score" class="text-[#fbbf24] font-bold text-sm">0</span>
       </div>
       <div>
-        <span class="text-[#047857] text-[10px] block">LOSS OF SEP</span>
+        <span class="text-[#047857] text-[10px] block">SEPARATION LOSS</span>
         <span id="stat-conflicts" class="text-[#f87171] font-bold text-sm">0</span>
       </div>
     </div>
   </header>
 
-  <!-- Radar Scope & Flight Strip Rack -->
+  <!-- Tactical Display & Flight Controls -->
   <main class="flex-1 max-w-7xl mx-auto w-full p-3 grid grid-cols-1 lg:grid-cols-4 gap-3 items-start">
     
     <!-- Tactical Radar Scope (3 Columns) -->
-    <div class="lg:col-span-3 bg-[#020b06] rounded-xl border border-[#064e3b] relative overflow-hidden aspect-square max-h-[80vh] w-full flex items-center justify-center shadow-2xl">
+    <div class="lg:col-span-3 bg-[#010904] rounded-xl border border-[#064e3b] relative overflow-hidden aspect-square max-h-[82vh] w-full flex items-center justify-center shadow-2xl">
       
       <canvas id="radar-canvas" class="w-full h-full cursor-crosshair"></canvas>
 
-      <!-- Simulated Sweeper -->
+      <!-- Sweeper Beam -->
       <div class="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
         <div class="w-full h-full rounded-full relative radar-sweep">
           <div class="w-1/2 h-0.5 bg-gradient-to-r from-transparent to-[#10b981]/25 absolute top-1/2 left-0 -translate-y-1/2"></div>
@@ -73,27 +73,28 @@
       </div>
 
       <!-- Scope Overlay Details -->
-      <div class="absolute top-2 left-2 bg-[#02130b]/90 border border-[#064e3b] p-2 rounded text-[10px] text-[#10b981] space-y-0.5 pointer-events-none">
-        <div><i class="fa-solid fa-diamond text-[8px] mr-1 text-[#38bdf8]"></i> FIXES: BNN, LAM, BIG, OCK</div>
-        <div><i class="fa-solid fa-road text-[8px] mr-1"></i> ACTIVE: RWY 27L (118.5) & RWY 27R (118.7)</div>
+      <div class="absolute top-2 left-2 bg-[#02130b]/90 border border-[#064e3b] p-2.5 rounded text-[10px] text-[#10b981] space-y-0.5 pointer-events-none">
+        <div><i class="fa-solid fa-diamond text-[8px] mr-1 text-[#38bdf8]"></i> STACKS: BNN (NW), LAM (NE), BIG (SE), OCK (SW)</div>
+        <div><i class="fa-solid fa-road text-[8px] mr-1"></i> RUNWAYS: 27L (118.5) & 27R (118.7) • ILS CAPTURE: &le; 3,000'</div>
+        <div class="text-[#047857]"><i class="fa-solid fa-clock text-[8px] mr-1"></i> REALISTIC PILOT DELAYS & AIRFRAME MOMENTUM ACTIVE</div>
       </div>
     </div>
 
-    <!-- Endless ATC Flight Control Strip & Keypad (1 Column) -->
+    <!-- Flight Strip & Control Keypad (1 Column) -->
     <div class="space-y-3">
       
-      <!-- Target Flight Strip Panel -->
+      <!-- Selected Target Strip -->
       <div class="bg-[#02130b] border border-[#064e3b] rounded-xl p-3 shadow-lg">
-        <div class="flex items-center justify-between border-b border-[#064e3b] pb-1.5 mb-2.5">
+        <div class="flex items-center justify-between border-b border-[#064e3b] pb-2 mb-2.5">
           <h3 class="text-xs font-bold uppercase tracking-wider text-[#34d399]">
-            <i class="fa-solid fa-plane text-[#10b981] mr-1"></i> FLIGHT STRIP
+            <i class="fa-solid fa-plane text-[#10b981] mr-1"></i> RADAR STRIP
           </h3>
           <span id="target-callsign" class="text-xs font-bold text-white bg-[#064e3b] px-2 py-0.5 rounded">NO TARGET</span>
         </div>
 
-        <div id="control-deck" class="space-y-3 opacity-30 pointer-events-none transition-all">
+        <div id="control-deck" class="space-y-3 opacity-25 pointer-events-none transition-all">
           
-          <!-- Telemetry Line -->
+          <!-- Telemetry Output -->
           <div class="grid grid-cols-4 gap-1 text-center text-xs bg-[#010904] p-1.5 rounded border border-[#064e3b]">
             <div>
               <span class="text-[9px] text-[#059669] block">HDG</span>
@@ -104,22 +105,22 @@
               <span id="target-alt" class="font-bold text-white">---'</span>
             </div>
             <div>
-              <span class="text-[9px] text-[#059669] block">SPD</span>
+              <span class="text-[9px] text-[#059669] block">IAS</span>
               <span id="target-spd" class="font-bold text-white">--- KT</span>
             </div>
             <div>
-              <span class="text-[9px] text-[#059669] block">APP</span>
+              <span class="text-[9px] text-[#059669] block">STATUS</span>
               <span id="target-app" class="font-bold text-white">---</span>
             </div>
           </div>
 
-          <!-- Heading Control Strip -->
+          <!-- Heading Control -->
           <div>
             <div class="flex justify-between text-[11px] mb-1">
-              <span class="text-[#059669]">HEADING:</span>
+              <span class="text-[#059669]">ASSIGN HEADING:</span>
               <span id="assigned-hdg-val" class="text-white font-bold">270°</span>
             </div>
-            <input type="range" id="input-hdg" min="0" max="350" step="5" value="270" oninput="updateHeadingUI(this.value)" class="w-full accent-[#10b981] cursor-pointer">
+            <input type="range" id="input-hdg" min="0" max="355" step="5" value="270" oninput="updateHeadingUI(this.value)" class="w-full accent-[#10b981] cursor-pointer">
             <div class="grid grid-cols-4 gap-1 mt-1 text-[10px]">
               <button onclick="adjustHeading(-30)" class="bg-[#064e3b] hover:bg-[#047857] py-1 rounded text-white">-30°</button>
               <button onclick="adjustHeading(-10)" class="bg-[#064e3b] hover:bg-[#047857] py-1 rounded text-white">-10°</button>
@@ -131,7 +132,7 @@
           <!-- Altitude Control -->
           <div>
             <div class="flex justify-between text-[11px] mb-1">
-              <span class="text-[#059669]">ALTITUDE:</span>
+              <span class="text-[#059669]">ASSIGN ALTITUDE:</span>
               <span id="assigned-alt-val" class="text-white font-bold">3,000 FT</span>
             </div>
             <div class="grid grid-cols-4 gap-1 text-[10px]">
@@ -146,10 +147,10 @@
             </div>
           </div>
 
-          <!-- Speed Control (Endless ATC Feature) -->
+          <!-- Speed Control -->
           <div>
             <div class="flex justify-between text-[11px] mb-1">
-              <span class="text-[#059669]">SPEED CONTROL:</span>
+              <span class="text-[#059669]">INDICATED AIRSPEED:</span>
               <span id="assigned-spd-val" class="text-white font-bold">210 KT</span>
             </div>
             <div class="grid grid-cols-4 gap-1 text-[10px]">
@@ -160,7 +161,7 @@
             </div>
           </div>
 
-          <!-- Approach Clearances (Dual Runways & Holding) -->
+          <!-- Dual ILS & Holding Commands -->
           <div class="space-y-1.5 pt-1">
             <div class="grid grid-cols-2 gap-1.5">
               <button id="btn-ils-27l" onclick="clearILS('27L')" class="bg-[#064e3b] hover:bg-[#047857] text-[#34d399] py-2 rounded text-xs font-bold transition flex items-center justify-center">
@@ -171,18 +172,18 @@
               </button>
             </div>
             <button onclick="toggleHold()" id="btn-hold" class="w-full bg-[#1e293b] hover:bg-[#334155] text-slate-300 py-1.5 rounded text-xs font-bold transition flex items-center justify-center">
-              <i class="fa-solid fa-arrows-spin mr-1.5"></i> ENTER HOLDING PATTERN
+              <i class="fa-solid fa-arrows-spin mr-1.5"></i> HOLD OVER FIX
             </button>
           </div>
 
         </div>
       </div>
 
-      <!-- Terminal Radiotelephony Log -->
+      <!-- Radiotelephony Comms Log -->
       <div class="bg-[#02130b] border border-[#064e3b] rounded-xl p-3 text-xs space-y-1.5">
-        <h4 class="text-[9px] uppercase text-[#059669] tracking-wider font-bold">RADAR TELEPHONY</h4>
+        <h4 class="text-[9px] uppercase text-[#059669] tracking-wider font-bold">RADAR TELEPHONY LOG</h4>
         <div id="atc-comms" class="h-28 overflow-y-auto space-y-1 text-[10px] text-[#a7f3d0] pr-1">
-          <div class="text-[#10b981]">> London TMA Approach operational. Vectoring into EGLL.</div>
+          <div class="text-[#10b981]">> London Terminal Control ready. Realistic inertia active.</div>
         </div>
       </div>
 
@@ -199,9 +200,9 @@
       [1, 2, 4].forEach(r => {
         const btn = document.getElementById(`rate-${r}`);
         if (r === rate) {
-          btn.className = "px-1.5 py-0.5 rounded text-[10px] bg-[#10b981] text-black font-bold";
+          btn.className = "px-2 py-0.5 rounded text-[10px] bg-[#10b981] text-black font-bold";
         } else {
-          btn.className = "px-1.5 py-0.5 rounded text-[10px] bg-[#064e3b] text-[#6ee7b7]";
+          btn.className = "px-2 py-0.5 rounded text-[10px] bg-[#064e3b] text-[#6ee7b7]";
         }
       });
     }
@@ -214,26 +215,36 @@
     }
     window.addEventListener('resize', resizeCanvas);
 
-    // Audio synthesizer
+    // Realistic ATC Audio Synthesizer
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playAudioTone(freq, dur) {
+    function playTone(freq, dur) {
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.frequency.value = freq;
-      gain.gain.value = 0.04;
+      gain.gain.value = 0.035;
       osc.connect(gain);
       gain.connect(audioCtx.destination);
       osc.start();
       osc.stop(audioCtx.currentTime + dur);
     }
 
-    // London Heathrow Navigation Fixes
+    // Optional Speech Synthesis readback
+    function speakReadback(text) {
+      if ('speechSynthesis' in window && simRate === 1) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1.15;
+        utterance.pitch = 0.95;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // London TMA Inbound Fixes
     const FIXES = [
-      { name: 'BNN', xRatio: 0.32, yRatio: 0.22 }, // Bovingdon (North-West)
-      { name: 'LAM', xRatio: 0.76, yRatio: 0.28 }, // Lambourne (North-East)
-      { name: 'BIG', xRatio: 0.74, yRatio: 0.75 }, // Biggin (South-East)
-      { name: 'OCK', xRatio: 0.35, yRatio: 0.80 }  // Ockham (South-West)
+      { name: 'BNN', xRatio: 0.30, yRatio: 0.20 }, // Bovingdon
+      { name: 'LAM', xRatio: 0.78, yRatio: 0.25 }, // Lambourne
+      { name: 'BIG', xRatio: 0.75, yRatio: 0.78 }, // Biggin
+      { name: 'OCK', xRatio: 0.32, yRatio: 0.82 }  // Ockham
     ];
 
     const AIRLINES = ['BAW', 'VIR', 'EZY', 'AFR', 'DLH', 'KLM', 'UAE', 'SAS', 'SWR'];
@@ -251,22 +262,28 @@
         const w = canvas.width / window.devicePixelRatio;
         const h = canvas.height / window.devicePixelRatio;
 
-        // Spawn around one of the 4 outer gates
+        // Spawn around one of the entry fixes
         const spawnFix = FIXES[Math.floor(Math.random() * FIXES.length)];
-        const angle = Math.random() * Math.PI * 2;
-        this.x = spawnFix.xRatio * w + Math.cos(angle) * 70;
-        this.y = spawnFix.yRatio * h + Math.sin(angle) * 70;
+        const offsetAngle = Math.random() * Math.PI * 2;
+        this.x = spawnFix.xRatio * w + Math.cos(offsetAngle) * 60;
+        this.y = spawnFix.yRatio * h + Math.sin(offsetAngle) * 60;
 
-        this.altitude = Math.floor(Math.random() * 4 + 6) * 1000; // 6,000 - 9,000 ft
+        this.altitude = Math.floor(Math.random() * 4 + 6) * 1000; // 6,000 to 9,000
         this.targetAltitude = this.altitude;
-        this.speed = 220;
-        this.targetSpeed = 220;
+        this.currentSpeed = 230; // Indicated Airspeed (kts)
+        this.targetSpeed = 230;
 
-        // Turn towards center initially
+        // Point roughly towards central London initially
         const cx = w / 2;
         const cy = h / 2;
         this.heading = (Math.atan2(cy - this.y, cx - this.x) * 180 / Math.PI + 360) % 360;
         this.targetHeading = this.heading;
+
+        // Reaction Latency Timer (Pilots take 1.5 to 3 seconds to execute changes)
+        this.pendingHeading = this.heading;
+        this.pendingAltitude = this.altitude;
+        this.pendingSpeed = this.currentSpeed;
+        this.reactionDelay = 0;
 
         this.clearedRunway = null; // '27L' or '27R'
         this.onILS = false;
@@ -275,39 +292,71 @@
         this.conflict = false;
       }
 
+      setCommand(hdg, alt, spd, textMsg) {
+        // Pilot acknowledgment latency: 90 - 180 frames (1.5 - 3s at 60fps)
+        this.reactionDelay = Math.floor((Math.random() * 80 + 70) / simRate);
+        if (hdg !== null) this.pendingHeading = hdg;
+        if (alt !== null) this.pendingAltitude = alt;
+        if (spd !== null) this.pendingSpeed = spd;
+
+        logComm(`ATC: ${this.callsign}, ${textMsg}`);
+        setTimeout(() => {
+          speakReadback(`${this.callsign}, ${textMsg}`);
+        }, 300);
+      }
+
       update() {
-        // Turns: 3 degrees per standard rate tick * simRate
+        // Handle Pilot Reaction Timer
+        if (this.reactionDelay > 0) {
+          this.reactionDelay--;
+          if (this.reactionDelay <= 0) {
+            this.targetHeading = this.pendingHeading;
+            this.targetAltitude = this.pendingAltitude;
+            this.targetSpeed = this.pendingSpeed;
+          }
+        }
+
+        // REALISTIC TURNS: 3 degrees per second standard rate
+        // At 60 FPS, 3°/sec is 0.05° per frame * simRate
         let diff = (this.targetHeading - this.heading + 180) % 360 - 180;
-        const turnRate = 2.5 * simRate;
-        if (Math.abs(diff) > turnRate) {
-          this.heading = (this.heading + Math.sign(diff) * turnRate + 360) % 360;
+        const standardTurnPerFrame = 0.055 * simRate; 
+        if (Math.abs(diff) > standardTurnPerFrame) {
+          this.heading = (this.heading + Math.sign(diff) * standardTurnPerFrame + 360) % 360;
         } else {
           this.heading = this.targetHeading;
         }
 
-        // Altitude change: 25ft per tick * simRate
-        if (this.altitude < this.targetAltitude) this.altitude = Math.min(this.altitude + 25 * simRate, this.targetAltitude);
-        if (this.altitude > this.targetAltitude) this.altitude = Math.max(this.altitude - 25 * simRate, this.targetAltitude);
-
-        // Speed change: 1.5kt per tick * simRate
-        if (this.speed < this.targetSpeed) this.speed = Math.min(this.speed + 1.5 * simRate, this.targetSpeed);
-        if (this.speed > this.targetSpeed) this.speed = Math.max(this.speed - 1.5 * simRate, this.targetSpeed);
-
-        // Holding orbit behavior
-        if (this.inHold) {
-          this.targetHeading = (this.targetHeading + 1.2 * simRate) % 360;
+        // REALISTIC DESCENT: ~1,500 - 2,000 fpm (~0.5 ft per frame at 60 FPS)
+        const altRatePerFrame = 0.52 * simRate;
+        if (this.altitude < this.targetAltitude) {
+          this.altitude = Math.min(this.altitude + altRatePerFrame * 30, this.targetAltitude);
+        } else if (this.altitude > this.targetAltitude) {
+          this.altitude = Math.max(this.altitude - altRatePerFrame * 30, this.targetAltitude);
         }
 
-        // Movement
-        const rad = (this.heading - 90) * Math.PI / 180;
-        const dist = (this.speed / 200) * 0.42 * simRate;
-        this.x += Math.cos(rad) * dist;
-        this.y += Math.sin(rad) * dist;
+        // REALISTIC ACCELERATION & DRAG INERTIA: Gradual engine spool
+        const spdRate = 0.04 * simRate;
+        if (this.currentSpeed < this.targetSpeed) {
+          this.currentSpeed = Math.min(this.currentSpeed + spdRate, this.targetSpeed);
+        } else if (this.currentSpeed > this.targetSpeed) {
+          this.currentSpeed = Math.max(this.currentSpeed - spdRate, this.targetSpeed);
+        }
 
-        // Breadcrumb history
-        if (Math.random() < 0.2) {
+        // Holding Orbit (Standard 1-minute rate turns)
+        if (this.inHold && this.reactionDelay <= 0) {
+          this.targetHeading = (this.targetHeading + standardTurnPerFrame) % 360;
+        }
+
+        // CALIBRATED GROUND MOVEMENT (Scaled for deliberate, realistic radar progression)
+        const rad = (this.heading - 90) * Math.PI / 180;
+        const groundDistance = (this.currentSpeed / 200) * 0.14 * simRate;
+        this.x += Math.cos(rad) * groundDistance;
+        this.y += Math.sin(rad) * groundDistance;
+
+        // Radar History Breadcrumbs
+        if (Math.random() < 0.12) {
           this.trail.unshift({ x: this.x, y: this.y });
-          if (this.trail.length > 7) this.trail.pop();
+          if (this.trail.length > 9) this.trail.pop();
         }
 
         const w = canvas.width / window.devicePixelRatio;
@@ -315,7 +364,7 @@
         const cx = w / 2;
         const cy = h / 2;
 
-        // ILS Glideslope Check (Heathrow 27L / 27R)
+        // ILS Localizer & Glideslope Intercept Check
         if (this.clearedRunway && !this.onILS) {
           const rwyY = this.clearedRunway === '27L' ? cy + 12 : cy - 12;
           const rwyX = cx - 25;
@@ -323,40 +372,44 @@
           const dx = this.x - rwyX;
           const dy = this.y - rwyY;
 
-          // Check if east of threshold, within intercept corridor (max 3,500ft, heading 240-300)
-          if (dx > 40 && dx < 220 && Math.abs(dy) < 18 && this.altitude <= 3500) {
+          // Corridor: East of threshold, altitude <= 3,200', intercept angle < 35°
+          if (dx > 40 && dx < 240 && Math.abs(dy) < 16 && this.altitude <= 3200) {
             if (Math.abs(this.heading - 270) <= 35) {
               this.onILS = true;
               this.targetHeading = 270;
+              this.pendingHeading = 270;
               this.targetAltitude = 0;
-              this.targetSpeed = 160;
+              this.pendingAltitude = 0;
+              this.targetSpeed = 160; // Spool back to final approach speed
+              this.pendingSpeed = 160;
               this.inHold = false;
-              logComm(`${this.callsign}: Established localizer & glideslope RWY ${this.clearedRunway}.`);
-              playAudioTone(880, 0.12);
+              logComm(`${this.callsign}: Localizer & Glideslope captured, RWY ${this.clearedRunway}.`);
+              playTone(880, 0.15);
+              speakReadback(`${this.callsign}, established localizer`);
             }
           }
         }
 
-        // Touchdown criteria
+        // Touchdown Sequence
         if (this.onILS) {
           const rwyY = this.clearedRunway === '27L' ? cy + 12 : cy - 12;
           const distToThreshold = Math.hypot(this.x - (cx - 25), this.y - rwyY);
-          if (distToThreshold < 30 && this.altitude <= 400) {
-            score += 200;
+          if (distToThreshold < 30 && this.altitude <= 300) {
+            score += 250;
             landedCount++;
             document.getElementById('stat-score').textContent = score;
             document.getElementById('stat-landed').textContent = landedCount;
-            logComm(`TOWER: ${this.callsign} safe touchdown RWY ${this.clearedRunway}.`);
-            playAudioTone(1150, 0.18);
+            logComm(`TOWER: ${this.callsign} touchdown confirmed RWY ${this.clearedRunway}.`);
+            playTone(1100, 0.2);
             return false;
           }
         }
 
-        // Out of Sector check
+        // Out of Sector Warning
         if (this.x < -30 || this.x > w + 30 || this.y < -30 || this.y > h + 30) {
-          score = Math.max(0, score - 150);
+          score = Math.max(0, score - 200);
           document.getElementById('stat-score').textContent = score;
-          logComm(`WARNING: ${this.callsign} left TMA sector boundaries without clearance.`);
+          logComm(`LOSS OF CONTROL: ${this.callsign} exited controlled TMA airspace.`);
           return false;
         }
 
@@ -374,12 +427,12 @@
           const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
           const altDiff = Math.abs(p1.altitude - p2.altitude);
 
-          // Endless ATC rule: 3 NM (~48px) and 1,000 ft
-          if (dist < 48 && altDiff < 950) {
+          // Standard ICAO TMA Separation: 3.0 NM (~42px) and 1,000 ft
+          if (dist < 42 && altDiff < 950) {
             p1.conflict = true;
             p2.conflict = true;
             activeConflicts++;
-            if (Math.random() < 0.04) playAudioTone(300, 0.1);
+            if (Math.random() < 0.03) playTone(280, 0.1);
           }
         }
       }
@@ -392,14 +445,14 @@
     }
 
     function spawnAircraft() {
-      if (aircraft.length < 7) {
+      if (aircraft.length < 6) {
         const cs = AIRLINES[Math.floor(Math.random() * AIRLINES.length)] + Math.floor(Math.random() * 899 + 100);
         aircraft.push(new Plane(cs));
-        logComm(`TMA INBOUND: ${cs} checking in.`);
+        logComm(`RADAR CONTACT: ${cs} arriving at standard TMA boundary.`);
       }
     }
 
-    // Canvas Radar Renderer
+    // Render Tactical Scope
     function draw() {
       const w = canvas.width / window.devicePixelRatio;
       const h = canvas.height / window.devicePixelRatio;
@@ -409,15 +462,15 @@
       ctx.clearRect(0, 0, w, h);
 
       // Radar Range Rings (5, 10, 15, 20 NM)
-      ctx.strokeStyle = '#064e3b';
+      ctx.strokeStyle = '#043424';
       ctx.lineWidth = 1;
-      [50, 100, 150, 200].forEach(r => {
+      [42, 84, 126, 168].forEach(r => {
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.stroke();
       });
 
-      // Draw Navigation Fixes (BNN, LAM, BIG, OCK)
+      // Navigation Waypoints (BNN, LAM, BIG, OCK)
       FIXES.forEach(f => {
         const fx = f.xRatio * w;
         const fy = f.yRatio * h;
@@ -437,7 +490,7 @@
         ctx.fillText(f.name, fx + 8, fy + 3);
       });
 
-      // Dual Runways: RWY 27L & RWY 27R
+      // Dual Heathrow Runways (27L & 27R)
       ['27L', '27R'].forEach(rwy => {
         const ry = rwy === '27L' ? cy + 12 : cy - 12;
 
@@ -448,13 +501,13 @@
         ctx.lineTo(cx + 5, ry);
         ctx.stroke();
 
-        // Extended ILS localizer lines
-        ctx.strokeStyle = '#047857';
+        // Extended Localizer Centerline
+        ctx.strokeStyle = '#065f46';
         ctx.lineWidth = 1;
         ctx.setLineDash([4, 4]);
         ctx.beginPath();
         ctx.moveTo(cx + 5, ry);
-        ctx.lineTo(cx + 200, ry);
+        ctx.lineTo(cx + 220, ry);
         ctx.stroke();
         ctx.setLineDash([]);
 
@@ -463,11 +516,11 @@
         ctx.fillText(rwy, cx - 75, ry + 3);
       });
 
-      // Draw Aircraft & Speed Vector Leaders
+      // Aircraft & Radar Vectors
       aircraft.forEach(p => {
-        // Draw 1-minute vector leader line (Endless ATC feature)
+        // Projected Flight Leader: 1 minute into the future
         const rad = (p.heading - 90) * Math.PI / 180;
-        const leaderDist = (p.speed / 200) * 32;
+        const leaderDist = (p.currentSpeed / 200) * 28;
         ctx.strokeStyle = p.conflict ? '#ef4444' : '#059669';
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -478,14 +531,14 @@
         // Breadcrumbs
         ctx.fillStyle = p.conflict ? '#f87171' : (p.onILS ? '#38bdf8' : '#10b981');
         p.trail.forEach((t, i) => {
-          ctx.globalAlpha = (1 - i / 7) * 0.4;
+          ctx.globalAlpha = (1 - i / 9) * 0.35;
           ctx.beginPath();
           ctx.arc(t.x, t.y, 1.5, 0, Math.PI * 2);
           ctx.fill();
         });
         ctx.globalAlpha = 1.0;
 
-        // Plane icon
+        // Airframe Icon
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.heading * Math.PI / 180);
@@ -508,12 +561,12 @@
         }
         ctx.restore();
 
-        // Data Tag Block
+        // Real Data Tag Block
         ctx.fillStyle = p.conflict ? '#f87171' : (p.onILS ? '#38bdf8' : '#e2e8f0');
         ctx.font = '10px monospace';
         ctx.fillText(p.callsign, p.x + 10, p.y - 4);
         ctx.fillStyle = '#6ee7b7';
-        ctx.fillText(`${Math.round(p.altitude / 100)}A ${Math.round(p.speed)}K`, p.x + 10, p.y + 7);
+        ctx.fillText(`${Math.round(p.altitude / 100)}A ${Math.round(p.currentSpeed)}K`, p.x + 10, p.y + 7);
       });
     }
 
@@ -525,7 +578,7 @@
       requestAnimationFrame(gameLoop);
     }
 
-    // Radar Selection Handler
+    // Radar Click Handling
     canvas.addEventListener('click', (e) => {
       const rect = canvas.getBoundingClientRect();
       const mx = e.clientX - rect.left;
@@ -533,19 +586,19 @@
 
       let match = null;
       aircraft.forEach(p => {
-        if (Math.hypot(p.x - mx, p.y - my) < 20) match = p;
+        if (Math.hypot(p.x - mx, p.y - my) < 22) match = p;
       });
 
       selectedPlane = match;
       if (selectedPlane) {
-        playAudioTone(700, 0.05);
-        document.getElementById('control-deck').classList.remove('opacity-30', 'pointer-events-none');
-        document.getElementById('input-hdg').value = Math.round(selectedPlane.targetHeading);
-        document.getElementById('assigned-hdg-val').textContent = `${Math.round(selectedPlane.targetHeading)}°`;
-        document.getElementById('assigned-alt-val').textContent = `${selectedPlane.targetAltitude.toLocaleString()} FT`;
-        document.getElementById('assigned-spd-val').textContent = `${selectedPlane.targetSpeed} KT`;
+        playTone(700, 0.05);
+        document.getElementById('control-deck').classList.remove('opacity-25', 'pointer-events-none');
+        document.getElementById('input-hdg').value = Math.round(selectedPlane.pendingHeading);
+        document.getElementById('assigned-hdg-val').textContent = `${Math.round(selectedPlane.pendingHeading)}°`;
+        document.getElementById('assigned-alt-val').textContent = `${selectedPlane.pendingAltitude.toLocaleString()} FT`;
+        document.getElementById('assigned-spd-val').textContent = `${selectedPlane.pendingSpeed} KT`;
       } else {
-        document.getElementById('control-deck').classList.add('opacity-30', 'pointer-events-none');
+        document.getElementById('control-deck').classList.add('opacity-25', 'pointer-events-none');
       }
     });
 
@@ -562,8 +615,10 @@
       document.getElementById('target-callsign').textContent = selectedPlane.callsign;
       document.getElementById('target-hdg').textContent = `${Math.round(selectedPlane.heading)}°`;
       document.getElementById('target-alt').textContent = `${Math.round(selectedPlane.altitude)}'`;
-      document.getElementById('target-spd').textContent = `${Math.round(selectedPlane.speed)}K`;
-      document.getElementById('target-app').textContent = selectedPlane.clearedRunway || (selectedPlane.inHold ? 'HOLD' : 'VECT');
+      document.getElementById('target-spd').textContent = `${Math.round(selectedPlane.currentSpeed)}K`;
+      
+      let statusStr = selectedPlane.reactionDelay > 0 ? 'RX...' : (selectedPlane.clearedRunway ? `ILS ${selectedPlane.clearedRunway}` : (selectedPlane.inHold ? 'HOLD' : 'VECT'));
+      document.getElementById('target-app').textContent = statusStr;
 
       // Update ILS Buttons Status
       ['27L', '27R'].forEach(rwy => {
@@ -578,44 +633,41 @@
 
     function updateHeadingUI(val) {
       if (!selectedPlane) return;
-      selectedPlane.targetHeading = parseInt(val);
+      selectedPlane.setCommand(parseInt(val), null, null, `turn heading ${val} degrees`);
       selectedPlane.inHold = false;
       document.getElementById('assigned-hdg-val').textContent = `${val}°`;
     }
 
     function adjustHeading(delta) {
       if (!selectedPlane) return;
-      let newHdg = (selectedPlane.targetHeading + delta + 360) % 360;
-      selectedPlane.targetHeading = newHdg;
+      let newHdg = (selectedPlane.pendingHeading + delta + 360) % 360;
+      selectedPlane.setCommand(newHdg, null, null, `turn heading ${newHdg} degrees`);
       selectedPlane.inHold = false;
       document.getElementById('input-hdg').value = newHdg;
       document.getElementById('assigned-hdg-val').textContent = `${newHdg}°`;
-      logComm(`ATC: ${selectedPlane.callsign}, turn heading ${newHdg}°.`);
-      playAudioTone(600, 0.04);
+      playTone(600, 0.04);
     }
 
     function assignAltitude(alt) {
       if (!selectedPlane) return;
-      selectedPlane.targetAltitude = alt;
+      selectedPlane.setCommand(null, alt, null, `descend and maintain ${alt} feet`);
       document.getElementById('assigned-alt-val').textContent = `${alt.toLocaleString()} FT`;
-      logComm(`ATC: ${selectedPlane.callsign}, descend to ${alt} feet.`);
-      playAudioTone(600, 0.04);
+      playTone(600, 0.04);
     }
 
     function assignSpeed(spd) {
       if (!selectedPlane) return;
-      selectedPlane.targetSpeed = spd;
+      selectedPlane.setCommand(null, null, spd, `maintain speed ${spd} knots`);
       document.getElementById('assigned-spd-val').textContent = `${spd} KT`;
-      logComm(`ATC: ${selectedPlane.callsign}, maintain speed ${spd} knots.`);
-      playAudioTone(600, 0.04);
+      playTone(600, 0.04);
     }
 
     function clearILS(rwy) {
       if (!selectedPlane) return;
       selectedPlane.clearedRunway = rwy;
       selectedPlane.inHold = false;
-      logComm(`ATC: ${selectedPlane.callsign}, cleared ILS approach runway ${rwy}.`);
-      playAudioTone(850, 0.08);
+      selectedPlane.setCommand(null, null, null, `cleared ILS approach runway ${rwy}`);
+      playTone(850, 0.08);
     }
 
     function toggleHold() {
@@ -623,9 +675,9 @@
       selectedPlane.inHold = !selectedPlane.inHold;
       if (selectedPlane.inHold) {
         selectedPlane.clearedRunway = null;
-        logComm(`ATC: ${selectedPlane.callsign}, enter holding pattern.`);
+        selectedPlane.setCommand(null, null, null, `enter holding pattern`);
       }
-      playAudioTone(700, 0.06);
+      playTone(700, 0.06);
     }
 
     function logComm(text) {
@@ -636,12 +688,12 @@
       if (comms.children.length > 25) comms.removeChild(comms.lastChild);
     }
 
-    // Bootstrap
+    // Launch
     resizeCanvas();
-    for (let i = 0; i < 4; i++) spawnAircraft();
-    setInterval(spawnAircraft, 12000);
+    for (let i = 0; i < 3; i++) spawnAircraft();
+    setInterval(spawnAircraft, 16000);
     gameLoop();
   </script>
 </body>
-</html>
+</html></html>
        
